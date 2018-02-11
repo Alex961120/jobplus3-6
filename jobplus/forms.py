@@ -95,6 +95,60 @@ class UserinfoForm(FlaskForm):
             self.service_year.data = seeker.service_year
         return seeker
 
+#
+# class SeekerResumeForm(FlaskForm):
+#     resume_type = SelectField('简历类型', choices=[('1', '在线填写'), ('2', '文件上传')])
+#     photo =;
+#     expect_salary_min = db.Column(db.Integer)
+#
+#     #     expect_salary_max = db.Column(db.Integer)
+#     #
+#     #     edu_exp = db.Column(db.Text)
+#     #     self_intro = db.Column(db.Text)
+#     #     project_exp = db.Column(db.Text)
+#     #     expect_job = db.Column(db.String(64))
+#     #     attachment = db.Column(db.String(256))
+#
+#     def create_resume(self):
+#         pass
+# class Resume(Base):
+#     __tablename__ = 'resume'
+#
+#     TYPE_WEB_RESUME = 1
+#     TYPE_FILE_RESUME = 2
+#
+#     # 性别
+#     GENDER_M = 10
+#     GENDER_F = 20
+#
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+#     resume_type = db.Column(db.SmallInteger, default=TYPE_WEB_RESUME, nullable=False)
+#
+#     photo = db.Column(db.String(256))
+#     expect_salary_min = db.Column(db.Integer)
+#     expect_salary_max = db.Column(db.Integer)
+#
+#     edu_exp = db.Column(db.Text)
+#     self_intro = db.Column(db.Text)
+#     project_exp = db.Column(db.Text)
+#     expect_job = db.Column(db.String(64))
+#     attachment = db.Column(db.String(256))
+#
+#     # statics
+#     # 已投递的职位数量
+#     jobs_applied_number = db.Column(db.Integer, default=0)
+#
+#     def __repr__(self):
+#         return '<Resume(id={})>'.format(self.id)
+#
+#     def update_statics(self):
+#         self.jobs_applied_number = len(self.jobs)
+#
+#     # TODO 到简历详情页的链接
+#     @property
+#     def url(self):
+#         pass
 
 class SeekerRegisterForm(FlaskForm):
     # TODO 应该由正则表达式 Regexp 来验证用户名，只含数字和字母
