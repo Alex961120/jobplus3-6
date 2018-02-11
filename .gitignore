@@ -5,3 +5,4 @@ __pycache__
 migrations
 .idea
 .ipynb_checkpoints
+jobplus/config.py
