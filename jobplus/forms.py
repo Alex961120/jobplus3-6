@@ -11,10 +11,11 @@ from flask_uploads import UploadSet, IMAGES
 from flask_login import current_user
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from werkzeug.utils import secure_filename
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, ValidationError, TextAreaField, SelectField, DateField, IntegerField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, ValidationError, TextAreaField, SelectField,\
+                    DateField, IntegerField
 from wtforms.validators import Length, Email, EqualTo, DataRequired, Regexp, URL
 
-from jobplus.models import db, User, Seeker, Company, Job
+from jobplus.models import db, User, Seeker, Company, Job,Resume
 
 
 class LoginForm(FlaskForm):
@@ -95,60 +96,61 @@ class UserinfoForm(FlaskForm):
             self.service_year.data = seeker.service_year
         return seeker
 
-#
-# class SeekerResumeForm(FlaskForm):
-#     resume_type = SelectField('简历类型', choices=[('1', '在线填写'), ('2', '文件上传')])
-#     photo =;
-#     expect_salary_min = db.Column(db.Integer)
-#
-#     #     expect_salary_max = db.Column(db.Integer)
-#     #
-#     #     edu_exp = db.Column(db.Text)
-#     #     self_intro = db.Column(db.Text)
-#     #     project_exp = db.Column(db.Text)
-#     #     expect_job = db.Column(db.String(64))
-#     #     attachment = db.Column(db.String(256))
-#
-#     def create_resume(self):
-#         pass
-# class Resume(Base):
-#     __tablename__ = 'resume'
-#
-#     TYPE_WEB_RESUME = 1
-#     TYPE_FILE_RESUME = 2
-#
-#     # 性别
-#     GENDER_M = 10
-#     GENDER_F = 20
-#
-#     id = db.Column(db.Integer, primary_key=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-#     resume_type = db.Column(db.SmallInteger, default=TYPE_WEB_RESUME, nullable=False)
-#
-#     photo = db.Column(db.String(256))
-#     expect_salary_min = db.Column(db.Integer)
-#     expect_salary_max = db.Column(db.Integer)
-#
-#     edu_exp = db.Column(db.Text)
-#     self_intro = db.Column(db.Text)
-#     project_exp = db.Column(db.Text)
-#     expect_job = db.Column(db.String(64))
-#     attachment = db.Column(db.String(256))
-#
-#     # statics
-#     # 已投递的职位数量
-#     jobs_applied_number = db.Column(db.Integer, default=0)
-#
-#     def __repr__(self):
-#         return '<Resume(id={})>'.format(self.id)
-#
-#     def update_statics(self):
-#         self.jobs_applied_number = len(self.jobs)
-#
-#     # TODO 到简历详情页的链接
-#     @property
-#     def url(self):
-#         pass
+
+photos = UploadSet('photos', IMAGES)
+
+
+#TODO 投简历form
+class SeekerResumeForm(FlaskForm):
+    resume_type = SelectField('简历类型', choices=[('1', '在线填写'), ('2', '文件上传')])
+    photo = FileField('头像', validators=[
+                     FileAllowed(photos, '只能上传图片文件！'),
+                      FileRequired('文件未选择！')])
+    expect_salary_min = StringField('期望最低工资', validators=[DataRequired()],
+                                    render_kw={"placeholder": "请输入期望最低工资"})
+    expect_salary_max = StringField('期望最高工资', validators=[DataRequired()],
+                                    render_kw={"placeholder": "请输入期望最高工资"})
+
+    edu_exp = SelectField('学历', choices=[
+                        ('1', '专科'),
+                        ('2', '本科'),
+                        ('4', '硕士'),
+                        ('3', '博士'),
+                        ('5', '其他')
+                    ])
+    self_intro = TextAreaField('自我介绍', validators=[DataRequired(), Length(2, 256)])
+    project_exp = TextAreaField('项目经验', validators=[DataRequired(), Length(2, 256)])
+    expect_job = TextAreaField('期望工作', validators=[DataRequired(), Length(2, 256)])
+    attachment = FileField('附件（只支持pdf文件）', validators=[FileAllowed(['pdf'],'请上传pdf文件')])
+    submit = SubmitField('投递')
+
+    def update_resume(self):
+        resume = Resume()
+        resume.user_id = current_user.id
+        resume.resume_type = 1
+        resume.photo = self.photo.data
+        resume.expect_salary_min = self.expect_salary_min.data
+        resume.expect_salary_max = self.expect_salary_min.data
+        resume.edu_exp = self.edu_exp.data
+        resume.self_intro = self.self_intro.data
+        resume.project_exp = self.project_exp.data
+        resume.expect_job = self.expect_job.data
+        resume.attachment = self.attachment.data
+        db.session.add(resume)
+        db.session.commit()
+        return  resume
+# seeker.user = current_user
+#         seeker.gender = self.gender.data
+#         seeker.phone = self.phone.data
+#         seeker.name = self.name.data
+#         seeker.college = self.college.data
+#         seeker.education = self.education.data
+#         seeker.major = self.major.data
+#         seeker.service_year = self.service_year.data
+#         db.session.add(seeker)
+#         db.session.commit()
+#         return seeker
+
 
 class SeekerRegisterForm(FlaskForm):
     # TODO 应该由正则表达式 Regexp 来验证用户名，只含数字和字母
@@ -206,7 +208,7 @@ class CompanyRegisterForm(FlaskForm):
         return user
 
 
-photos = UploadSet('photos', IMAGES)
+
 
 
 class CompanyProfileForm(FlaskForm):

@@ -4,13 +4,12 @@
 
 from flask import (Blueprint, abort, current_app, flash, redirect,
                    render_template, request, url_for)
-from flask_login import current_user
+from flask_login import current_user,login_user, login_required
 
 from jobplus.decorators import company_required, roles_required
 from jobplus.models import Job, User, db, Delivery, Resume, STATUS_REJECTED, STATUS_ACCEPTED, STATUS_SENT
 
-from jobplus.forms import JobForm
-
+from jobplus.forms import JobForm, SeekerRegisterForm, SeekerResumeForm
 job = Blueprint('job', __name__, url_prefix='/job')
 
 
@@ -32,25 +31,30 @@ def detail(job_id):
     return render_template('job/detail.html', job=Job.query.get_or_404(job_id))
 
 
-@job.route('/<int:job_id>/apply')
+@job.route('/<int:job_id>/apply', methods=['GET', 'POST'])
+@login_required
 @roles_required(User.ROLE_SEEKER)
 def apply(job_id):
     job = Job.query.get_or_404(job_id)
+    form = SeekerResumeForm()
     resume = Resume.query.filter_by(user_id=current_user.id).first()
     if resume is None:
         flash('请上传简历后再投递', 'danger')
     elif resume:
         flash('已经投递过该职位', 'danger')
     else:
-        d = Delivery(
-            resume_id=resume.id,
-            job_id=job.id,
-            company_id =job.company.id,
-            status=1
-        )
-        db.session.add(d)
-        db.session.commit()
-        flash('投递成功', 'success')
+        if form.validate_on_submit():
+            # TODO 投简历form
+            form.update_resume()
+            d = Delivery(
+                resume_id=resume.id,
+                job_id=job.id,
+                company_id=job.company.id,
+                status=1
+            )
+            db.session.add(d)
+            db.session.commit()
+            flash('投递成功', 'success')
     return render_template('job/detail.html', job=job)
 
 

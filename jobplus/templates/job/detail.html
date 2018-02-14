@@ -45,21 +45,13 @@
     <div class="col-md-3 col-xs-12">
         <p>
             {% if not job.current_user_is_applied %}
-             <a href=" {{ url_for('job.apply',job_id=job.id) }}" class="btn btn-primary" role="button">投递</a>
+             <a href="{{ url_for('job.apply',job_id=job.id) }}" class="btn btn-primary" role="button"  data-toggle="modal" data-target="#Edit">投递</a>
              {% else %}
              <a href="#" class="btn btn-primary" role="button" disabled="disabled" >已投递</a>
             {% endif %}
              <span class="glyphicon glyphicon-hand-left"></span><b>快速投递</b>
         </p>
         <p><a href="#" class="btn btn-default" role="button">关注</a> <strong>{{ job.follower_number }}</strong>关注 <strong>{{ job.resume_number }}</strong>投递</p>
-        <div class="btn-group">
-            <p>
-
-                    <a href="#" class="btn btn-primary" role="button" data-toggle="modal" data-target="#Edit">在线填写</a>
-                    <a href="#" class="btn btn-primary" role="button" data-toggle="modal" data-target="#File">文件上传</a>
-
-            </p>
-        </div>
 
 
     </div>
@@ -78,13 +70,23 @@
             </h4>
         </div>
         <div class="modal-body">
+       {#   TODO 简历填写   #}
+            {% if  not current_user.id %}
+                <p>请先进行 <a href="{{ url_for('front.login') }}">登录</a> ,才能投递简历。</p>
+            {% else %}
+                <p>姓名：{{ current_user.seeker_info.name }}</p>
+                <p>联系电话：{{ current_user.seeker_info.phone }}</p>
+                <p>毕业院校：{{ current_user.seeker_info.college }}</p>
+                <p>专业名称：{{ current_user.seeker_info.major }}</p>
+                <p>工作年限：{{ current_user.seeker_info.service_year }}</p>
+
+                {{ render_form(form,url_for('job.apply',job_id=job.id)) }}
+            {% endif %}
 
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">关闭
-            </button>
-            <button type="button" class="btn btn-primary">
-                提交更改
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+                关闭
             </button>
         </div>
     </div><!-- /.modal-content -->
@@ -93,30 +95,7 @@
 
 
 
-<div class="modal fade" id="File" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-<div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                &times;
-            </button>
-            <h4 class="modal-title" id="myModalLabel">
-                请上传文件
-            </h4>
-        </div>
-        <div class="modal-body">
 
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">关闭
-            </button>
-            <button type="button" class="btn btn-primary">
-                提交更改
-            </button>
-        </div>
-    </div><!-- /.modal-content -->
-</div><!-- /.modal -->
-</div>
 
 <div class="row">
  <div class="col-md-9">
@@ -135,7 +114,7 @@
      <p>{{ job.created_at | timesince }} 发布</p>
      <p>
           {% if not job.current_user_is_applied %}
-            <a href=" {{ url_for('job.apply',job_id=job.id) }}" class="btn btn-primary" role="button"  >投个简历</a>
+            <a href="{{ url_for('job.apply',job_id=job.id) }}" class="btn btn-primary" role="button"  >投个简历</a>
             {% else %}
             <a href="#" class="btn btn-primary" role="button" disabled="disabled" >已投递</a>
           {% endif %}
